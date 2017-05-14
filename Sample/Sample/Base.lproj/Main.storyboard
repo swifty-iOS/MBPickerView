@@ -1,14 +1,19 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="11134" systemVersion="15F34" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="12118" systemVersion="16E195" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+    <device id="retina4_7" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11106"/>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="12086"/>
+        <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
         <!--View Controller-->
         <scene sceneID="tne-QT-ifu">
             <objects>
-                <viewController id="BYZ-38-t0r" customClass="ViewController" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="BYZ-38-t0r" customClass="ViewController" customModule="Sample" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="y3c-jy-aDJ"/>
                         <viewControllerLayoutGuide type="bottom" id="wfy-db-euE"/>
@@ -16,8 +21,53 @@
                     <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="UEk-0Y-6Dw" customClass="MBPickerView" customModule="Sample" customModuleProvider="target">
+                                <rect key="frame" x="0.0" y="50" width="375" height="60"/>
+                                <color key="backgroundColor" red="1" green="0.94950509036267539" blue="0.07399661032761784" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="60" id="cXx-8c-CqK"/>
+                                </constraints>
+                            </view>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="9rb-Rm-KpU">
+                                <rect key="frame" x="16" y="140" width="343" height="24"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="21" id="Llv-bT-AKh"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="20"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="jQS-aT-bAH">
+                                <rect key="frame" x="16" y="194" width="343" height="30"/>
+                                <subviews>
+                                    <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" minValue="0.0" maxValue="1" translatesAutoresizingMaskIntoConstraints="NO" id="i45-vh-huS">
+                                        <rect key="frame" x="-2" y="0.0" width="347" height="31"/>
+                                        <connections>
+                                            <action selector="sliderViewChanged:" destination="BYZ-38-t0r" eventType="valueChanged" id="7mo-1u-VJs"/>
+                                        </connections>
+                                    </slider>
+                                </subviews>
+                            </stackView>
+                        </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <constraints>
+                            <constraint firstItem="jQS-aT-bAH" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" id="1PG-Ai-ryU"/>
+                            <constraint firstItem="9rb-Rm-KpU" firstAttribute="top" secondItem="UEk-0Y-6Dw" secondAttribute="bottom" constant="30" id="8lf-IY-4bg"/>
+                            <constraint firstItem="jQS-aT-bAH" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="BVS-Gu-t4u"/>
+                            <constraint firstItem="9rb-Rm-KpU" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="Kx5-Tp-SyC"/>
+                            <constraint firstItem="jQS-aT-bAH" firstAttribute="top" secondItem="9rb-Rm-KpU" secondAttribute="bottom" constant="30" id="LJ6-QG-fB8"/>
+                            <constraint firstItem="UEk-0Y-6Dw" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" constant="30" id="ZNx-q9-a4K"/>
+                            <constraint firstItem="UEk-0Y-6Dw" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="dug-HE-X5q"/>
+                            <constraint firstItem="9rb-Rm-KpU" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" id="fZy-Lk-ZVi"/>
+                            <constraint firstItem="UEk-0Y-6Dw" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="kHW-x8-1qQ"/>
+                        </constraints>
                     </view>
+                    <connections>
+                        <outlet property="label" destination="9rb-Rm-KpU" id="yyX-Jx-h1I"/>
+                        <outlet property="pagePickerView" destination="UEk-0Y-6Dw" id="ZGQ-8B-l5F"/>
+                        <outlet property="slider" destination="i45-vh-huS" id="wNf-06-5oQ"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>

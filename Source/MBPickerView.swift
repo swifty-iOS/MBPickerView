@@ -12,7 +12,7 @@ import UIKit
 struct PickerTitleAttributes {
     var color: UIColor!
     var font: UIFont!
-
+    
     /// Initialize Picker TitleAttributes
     ///
     /// - Parameters:
@@ -28,7 +28,7 @@ struct PickerTitleAttributes {
 struct MBPickerViewTitleAttribute {
     var selectedAttribues: PickerTitleAttributes!
     var deselectedAttributes: PickerTitleAttributes!
-
+    
     /// Initialize selected and deselected attributes
     ///
     /// - Parameters:
@@ -38,7 +38,7 @@ struct MBPickerViewTitleAttribute {
         self.selectedAttribues = selectedAttribues
         self.deselectedAttributes = deselectedAttributes
     }
-
+    
     /// Setting default title attibutes
     ///
     /// - Returns: MBPickerViewTitleAttribute
@@ -51,29 +51,22 @@ struct MBPickerViewTitleAttribute {
 // MARK: -
 /// Delegate for handling various event
 @objc protocol MBPickerViewDelegate {
-
-    /// This delegate let you know which item is going to display
-    ///
-    /// - Parameters:
-    ///   - pickerView: MBPickerView
-    ///   - item: Int
-    @objc optional func pickerView(_ pickerView: MBPickerView, willSelectItem item: Int)
-
+    
     /// This delegate called when item is selected and visible on PickerView
     ///
     /// - Parameters:
     ///   - pickerView: MBPickerView
     ///   - item: Int
     @objc optional func pickerView(_ pickerView: MBPickerView, didSelectItem item: Int)
-
-    /// This delegate called when picker is scroll, 
+    
+    /// This delegate called when picker is scroll,
     /// this will called only if user scrolls pikcer and not while selecting item
     ///
     /// - Parameters:
     ///   - pickerView: MBPickerView
     ///   - scrollView: UIScrollView
     @objc optional func pickerView(_ pickerView: MBPickerView, didScroll scrollView: UIScrollView)
-
+    
     /// This delegate will called once scroll ends,
     /// this will called only if user scrolls pikcer and not while selecting item
     ///
@@ -81,14 +74,14 @@ struct MBPickerViewTitleAttribute {
     ///   - pickerView: MBPickerView
     ///   - scrollView: UIScrolView
     @objc optional func pickerView(_ pickerView: MBPickerView, didScrollEnd scrollView: UIScrollView)
-
+    
     /// This delegate will called when user touches on Picker
     ///
     /// - Parameters:
     ///   - pickerView: MBPickerView
     ///   - touches: Set<UITouch>
     @objc optional func pickerView(_ pickerView: MBPickerView, didTouchBegan touches: Set<UITouch>)
-
+    
     /// This delegate will called when user removes touches on Picker
     ///
     /// - Parameters:
@@ -99,13 +92,13 @@ struct MBPickerViewTitleAttribute {
 // MARK: -
 /// This delegate is used to confiure picker data set
 @objc protocol MBPickerViewDataSource {
-
+    
     /// Set number of items in Picker View
     ///
     /// - Parameter pickerView: MBPickerView
     /// - Returns: Int
     @objc func pickerViewNumberOfItems(_ pickerView: MBPickerView) -> Int
-
+    
     /// Set view at speficic item
     ///
     /// - Parameters:
@@ -113,7 +106,7 @@ struct MBPickerViewTitleAttribute {
     ///   - item: Int
     /// - Returns: UIView
     @objc optional func pickerView(_ pickerView: MBPickerView, viewAtItem item: Int) -> UIView
-
+    
     /// Title of item at specific index, will not called if viewAtItem implemented
     /// *** will not called if viewAtItem implemented ***
     ///
@@ -122,7 +115,7 @@ struct MBPickerViewTitleAttribute {
     ///   - item: Item index of title
     /// - Returns: String
     @objc optional func pickerView(_ pickerView: MBPickerView, titleAtItem item: Int) -> String
-
+    
     /// Set color for item at specific index
     /// ***  will not called if viewAtItem implemented ***
     ///
@@ -137,22 +130,30 @@ struct MBPickerViewTitleAttribute {
 
 /// This Picker class which give veticle picker view same UIPickerView
 class MBPickerView: UIView {
-
+    
     /// Set title padding scale to view left and right tiltle / view
     var itemPadingScale: CGFloat = 0.5 {
         didSet { reloadData() }
     }
-
+    
+    /// Get current item index of picker view
+    var currentItem: Int? {
+        guard let index = lastSelectedIndex else { return nil }
+        return index.item
+    }
+    
+    fileprivate var allowSelectionWhileScrolling: Bool = false
+    
     /// Show all item in picker view, once set true titlePadding will not work here
     var showAllItem = false {
         didSet { reloadData() }
     }
-
+    
     /// Set title text color for MBPicker View
     var titleAttributes: MBPickerViewTitleAttribute! = MBPickerViewTitleAttribute.defaultAttribute() {
         didSet { reloadData() }
     }
-
+    
     /// Select a specific item in MBPickerView
     ///
     /// - Parameter item: Int, must less than total item count
@@ -166,23 +167,23 @@ class MBPickerView: UIView {
         }
         return false
     }
-
+    
     /// Set delegate to get call back of various events
     weak var delegate: MBPickerViewDelegate?
-
+    
     /// Set to manupate and configure data set for pikcer view
     weak var dataSource: MBPickerViewDataSource? {
         didSet { reloadData() }
     }
-
+    
     /// Reload data, it will call all the data source
     public func reloadData() {
         pickerCollectionView.reloadData()
-        if itemCount > 0 {
-            pickerCollectionView.scrollToItem(at: lastSelectedIndex, at: .centeredHorizontally, animated: false)
+        if itemCount > 0, let index = lastSelectedIndex {
+            pickerCollectionView.scrollToItem(at: index, at: .centeredHorizontally, animated: false)
         }
     }
-
+    
     /// Calulate cell width and padding
     fileprivate func prepareForReload() {
         if showAllItem {
@@ -197,29 +198,35 @@ class MBPickerView: UIView {
             edgeInset = UIEdgeInsets.zero
         }
     }
-
+    
     /// Set title padding to view next to other item
     fileprivate var edgeInset: UIEdgeInsets = UIEdgeInsets.zero
-
+    
     /// Number of item in picker
     fileprivate var itemCount = 0
-
+    
     /// Maintain last selected index to handle title color
-    fileprivate var lastSelectedIndex: IndexPath = IndexPath(item: 0, section: 0)
-
+    fileprivate var lastSelectedIndex: IndexPath? {
+        didSet {
+            if let index = lastSelectedIndex {
+                delegate?.pickerView?(self, didSelectItem: index.item)
+            }
+        }
+    }
+    
     /// Calculate item width along with scale padding
     fileprivate var cellWidth: CGFloat = 0
-
+    
     /// Collection View to view manage items
     fileprivate var pickerCollectionView =  PickerCollectionView(frame: .zero, collectionViewLayout: PickerFlowLayout())
-
+    
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         initialSetup()
     }
-
+    
     /// Setup collection view and delegates
-    func initialSetup() {
+    private func initialSetup() {
         pickerCollectionView.pickerView = self
         pickerCollectionView.backgroundColor = UIColor.clear
         pickerCollectionView.showsHorizontalScrollIndicator = false
@@ -228,7 +235,7 @@ class MBPickerView: UIView {
         pickerCollectionView.dataSource = self
         pickerCollectionView.delegate = self
     }
-
+    
     /// Adjust frame of collection view and reload data
     override func layoutSubviews() {
         super.layoutSubviews()
@@ -239,25 +246,30 @@ class MBPickerView: UIView {
 
 // MARK: -
 
-extension MBPickerView: UICollectionViewDelegateFlowLayout, UICollectionViewDataSource {
-
+extension MBPickerView: UICollectionViewDelegateFlowLayout, UICollectionViewDataSource, UIScrollViewDelegate {
+    
     // MARK: UICollectionView degate and Data Source
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         itemCount = 0
-        if let count = dataSource?.pickerViewNumberOfItems(self), count > 0 { itemCount = count }
+        if let count = dataSource?.pickerViewNumberOfItems(self), count > 0 {
+            itemCount = count
+        }
+        if itemCount > 0, lastSelectedIndex == nil {
+            lastSelectedIndex = IndexPath(item: 0, section: 0)
+        }
         prepareForReload()
         return itemCount
     }
     /// Set cell for UICollection View
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         if let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "CollectionCell", for: indexPath) as? CollectionCell {
-
+            
             if let view = dataSource?.pickerView?(self, viewAtItem: indexPath.item) {
                 view.frame = CGRect(x: 0, y: 0, width: cell.bounds.width, height: cell.bounds.height)
                 cell.addSubview(view)
                 return cell
             }
-
+            
             // Set up default titles delegat
             cell.setup(titleAttributes, selected: lastSelectedIndex == indexPath)
             cell.labelTitle?.text = dataSource?.pickerView?(self, titleAtItem: indexPath.item)
@@ -277,19 +289,17 @@ extension MBPickerView: UICollectionViewDelegateFlowLayout, UICollectionViewData
     /// Collection view did select item
     /// Call Picker view delegates
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        delegate?.pickerView?(self, willSelectItem: indexPath.item)
-        collectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: true)
         var reloadIndexes: [IndexPath] = []
         if !showAllItem {
             reloadIndexes = collectionView.visibleIndexPath
-        } else if indexPath != lastSelectedIndex {
-            reloadIndexes = [lastSelectedIndex, indexPath]
+        } else if indexPath != lastSelectedIndex, let index = lastSelectedIndex {
+            reloadIndexes = [index, indexPath]
         } else {
             reloadIndexes = [indexPath]
         }
         lastSelectedIndex = indexPath
         pickerCollectionView.reloadItems(at:reloadIndexes)
-        delegate?.pickerView?(self, didSelectItem: indexPath.item)
+        collectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: true)
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
@@ -306,22 +316,38 @@ extension MBPickerView: UICollectionViewDelegateFlowLayout, UICollectionViewData
     /// Scroll view delegate to manage select center item
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         delegate?.pickerView?(self, didScroll: scrollView)
+        if allowSelectionWhileScrolling {
+            let indexPath = centerIndex(scrollView: scrollView)
+            if indexPath != lastSelectedIndex {
+                lastSelectedIndex = indexPath
+                pickerCollectionView.reloadItems(at: pickerCollectionView.visibleIndexPath)
+            }
+        }
+    }
+    
+    func centerIndex(scrollView: UIScrollView) -> IndexPath {
+        var centerPoint = scrollView.contentOffset.x + (scrollView.bounds.width/2)
+        centerPoint = centerPoint - edgeInset.left
+        let indexPath = IndexPath(item: Int(ceil(centerPoint/cellWidth))-1, section: 0)
+        return indexPath
     }
     /// Select item which near to center of collection View
     func didScrollEnd(_ scrollView: UIScrollView) {
         delegate?.pickerView?(self, didScrollEnd: scrollView)
-        var centerPoint = scrollView.contentOffset.x + (scrollView.bounds.width/2)
-        centerPoint = centerPoint - edgeInset.left
-        let indexPath = IndexPath(item: Int(ceil(centerPoint/cellWidth))-1, section: 0)
-        collectionView(pickerCollectionView, didSelectItemAt: indexPath)
+        if allowSelectionWhileScrolling, let index = lastSelectedIndex {
+            pickerCollectionView.scrollToItem(at: index, at: .centeredHorizontally, animated: true)
+        } else {
+            let indexPath = centerIndex(scrollView: scrollView)
+            collectionView(pickerCollectionView, didSelectItemAt: indexPath)
+        }
     }
 }
 
 // MARK: -
 fileprivate class PickerCollectionView: UICollectionView {
-
+    
     weak var pickerView: MBPickerView?
-
+    
     /// Call delegate method to handle toches
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesBegan(touches, with: event)
@@ -335,7 +361,7 @@ fileprivate class PickerCollectionView: UICollectionView {
 }
 // MARK: -
 fileprivate extension UICollectionView {
-
+    
     /// Get all visible cell indexPath
     var visibleIndexPath: [IndexPath] {
         var indexes: [IndexPath] = []
@@ -359,7 +385,7 @@ private class PickerFlowLayout: UICollectionViewFlowLayout {
 
 // MARK: -
 fileprivate class CollectionCell: UICollectionViewCell {
-
+    
     var labelTitle: UILabel? {
         didSet {
             labelTitle?.numberOfLines = 0

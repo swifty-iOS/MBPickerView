@@ -12,7 +12,11 @@ class ViewController: UIViewController {
 
     @IBOutlet weak var label: UILabel!
     @IBOutlet weak var pagePickerView: MBPickerView!
-    @IBOutlet weak var slider: UISlider!
+    @IBOutlet weak var pageSlider: UISlider!
+    @IBOutlet weak var pageScaleSlider: UISlider!
+
+    @IBOutlet weak var labelPageScale: UILabel!
+    let pageCount = 100
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -31,13 +35,18 @@ class ViewController: UIViewController {
         pagePickerView.selectItem(Int(sender.value))
     }
 
+    @IBAction func pageScaleChange(_ sender: UISlider) {
+        pagePickerView.itemPadingScale = CGFloat(sender.value)
+        labelPageScale.text = "Select page scale: \(sender.value)"
+    }
 }
 
 extension ViewController: MBPickerViewDelegate, MBPickerViewDataSource {
 
     func pickerViewNumberOfItems(_ pickerView: MBPickerView) -> Int {
-        slider.maximumValue = 6
-        return 7
+        pageSlider.maximumValue = max(0, Float(pageCount-1))
+        pageScaleSlider.maximumValue = max(0, Float(pageCount-1))
+        return pageCount
     }
 
     func pickerView(_ pickerView: MBPickerView, titleAtItem item: Int) -> String {
@@ -50,6 +59,6 @@ extension ViewController: MBPickerViewDelegate, MBPickerViewDataSource {
 
     func pickerView(_ pickerView: MBPickerView, didSelectItem item: Int) {
         label.text = "Selected item: \(item+1)"
-        slider.value = Float(item)
+        pageSlider.value = Float(item)
     }
 }

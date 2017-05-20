@@ -23,7 +23,6 @@ struct PickerTitleAttributes {
         self.font = font
     }
 }
-
 // MARK: -
 /// Define selcted and deselected attrinutes item title
 struct MBPickerViewTitleAttribute {
@@ -49,7 +48,6 @@ struct MBPickerViewTitleAttribute {
             deselectedAttributes: PickerTitleAttributes(color: .lightGray, font: UIFont.systemFont(ofSize: 17)))
     }
 }
-
 // MARK: -
 /// Delegate for handling various event
 @objc protocol MBPickerViewDelegate {
@@ -68,14 +66,16 @@ struct MBPickerViewTitleAttribute {
     ///   - item: Int
     @objc optional func pickerView(_ pickerView: MBPickerView, didSelectItem item: Int)
 
-    /// This delegate called when picker is scroll, this will called only if user scrolls pikcer and not while selecting item
+    /// This delegate called when picker is scroll, 
+    /// this will called only if user scrolls pikcer and not while selecting item
     ///
     /// - Parameters:
     ///   - pickerView: MBPickerView
     ///   - scrollView: UIScrollView
     @objc optional func pickerView(_ pickerView: MBPickerView, didScroll scrollView: UIScrollView)
 
-    /// This delegate will called once scroll ends, this will called only if user scrolls pikcer and not while selecting item
+    /// This delegate will called once scroll ends,
+    /// this will called only if user scrolls pikcer and not while selecting item
     ///
     /// - Parameters:
     ///   - pickerView: MBPickerView
@@ -96,7 +96,6 @@ struct MBPickerViewTitleAttribute {
     ///   - touches: Set<UITouch>
     @objc optional func pickerView(_ pickerView: MBPickerView, didTouchEnded touches: Set<UITouch>)
 }
-
 // MARK: -
 /// This delegate is used to confiure picker data set
 @objc protocol MBPickerViewDataSource {
@@ -132,17 +131,15 @@ struct MBPickerViewTitleAttribute {
     ///   - item: Item index of title background color
     /// - Returns: UIColor
     @objc optional func pickerView(_ pickerView: MBPickerView, titleBackgroundColorAtItem item: Int) -> UIColor
-
 }
 
 // MARK: -
 
 /// This Picker class which give veticle picker view same UIPickerView
-
 class MBPickerView: UIView {
 
     /// Set title padding scale to view left and right tiltle / view
-    var titlePaddingScale: CGFloat = 0.8 {
+    var itemPadingScale: CGFloat = 0.5 {
         didSet { reloadData() }
     }
 
@@ -162,7 +159,7 @@ class MBPickerView: UIView {
     /// - Returns: Bool, either item is selcted or not
     @discardableResult
     func selectItem(_ item: Int) -> Bool {
-        if item < itemCount {
+        if item >= 0 && item < itemCount {
             let path = IndexPath(item: item, section: 0)
             collectionView(pickerCollectionView, didSelectItemAt: path)
             return true
@@ -179,18 +176,30 @@ class MBPickerView: UIView {
     }
 
     /// Reload data, it will call all the data source
-    public func  reloadData() {
+    public func reloadData() {
         pickerCollectionView.reloadData()
-        if pickerCollectionView.numberOfItems(inSection: 0) > 0 {
-            collectionView(pickerCollectionView, didSelectItemAt: lastSelectedIndex)
+        if itemCount > 0 {
+            pickerCollectionView.scrollToItem(at: lastSelectedIndex, at: .centeredHorizontally, animated: false)
         }
     }
 
-    /// Set title padding to view other item from Picker View
-    fileprivate var titlePadding: CGFloat {
-        if showAllItem { return 0 }
-        return pickerCollectionView.bounds.width*titlePaddingScale/3
+    /// Calulate cell width and padding
+    fileprivate func prepareForReload() {
+        if showAllItem {
+            cellWidth =  bounds.width/CGFloat(itemCount)
+            edgeInset = UIEdgeInsets.zero
+        } else if itemPadingScale >= 0 {
+            cellWidth =  max(bounds.width/((itemPadingScale*2)+1), bounds.width/CGFloat(itemCount))
+            let pading = (bounds.width/2) - (cellWidth/2)
+            edgeInset = UIEdgeInsets(top: 0, left: pading, bottom: 0, right: pading)
+        } else {
+            cellWidth = bounds.width
+            edgeInset = UIEdgeInsets.zero
+        }
     }
+
+    /// Set title padding to view next to other item
+    fileprivate var edgeInset: UIEdgeInsets = UIEdgeInsets.zero
 
     /// Number of item in picker
     fileprivate var itemCount = 0
@@ -199,12 +208,7 @@ class MBPickerView: UIView {
     fileprivate var lastSelectedIndex: IndexPath = IndexPath(item: 0, section: 0)
 
     /// Calculate item width along with scale padding
-    fileprivate var cellWidth: CGFloat {
-        if showAllItem {
-            return pickerCollectionView.bounds.width/CGFloat(itemCount)
-        }
-        return max(pickerCollectionView.bounds.width - (titlePadding*2), 0)
-    }
+    fileprivate var cellWidth: CGFloat = 0
 
     /// Collection View to view manage items
     fileprivate var pickerCollectionView =  PickerCollectionView(frame: .zero, collectionViewLayout: PickerFlowLayout())
@@ -229,7 +233,7 @@ class MBPickerView: UIView {
     override func layoutSubviews() {
         super.layoutSubviews()
         pickerCollectionView.frame = bounds
-        pickerCollectionView.reloadData()
+        reloadData()
     }
 }
 
@@ -238,16 +242,14 @@ class MBPickerView: UIView {
 extension MBPickerView: UICollectionViewDelegateFlowLayout, UICollectionViewDataSource {
 
     // MARK: UICollectionView degate and Data Source
-  // MARK: -
-
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        itemCount = dataSource?.pickerViewNumberOfItems(self) ?? 0
+        itemCount = 0
+        if let count = dataSource?.pickerViewNumberOfItems(self), count > 0 { itemCount = count }
+        prepareForReload()
         return itemCount
     }
-
     /// Set cell for UICollection View
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-
         if let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "CollectionCell", for: indexPath) as? CollectionCell {
 
             if let view = dataSource?.pickerView?(self, viewAtItem: indexPath.item) {
@@ -258,18 +260,20 @@ extension MBPickerView: UICollectionViewDelegateFlowLayout, UICollectionViewData
 
             // Set up default titles delegat
             cell.setup(titleAttributes, selected: lastSelectedIndex == indexPath)
-            cell.labelTitle?.text = dataSource?.pickerView?(self, titleAtItem: indexPath.item) ?? ""
-            cell.backgroundColor = dataSource?.pickerView?(self, titleBackgroundColorAtItem: indexPath.item) ?? .clear
+            cell.labelTitle?.text = dataSource?.pickerView?(self, titleAtItem: indexPath.item)
+            if let bgColor = dataSource?.pickerView?(self, titleBackgroundColorAtItem: indexPath.item) {
+                cell.backgroundColor = bgColor
+            } else {
+                cell.backgroundColor = .clear
+            }
             return cell
         }
         return UICollectionViewCell()
     }
-
     /// Calulate size for item for UICollection view
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         return CGSize(width: cellWidth, height: collectionView.bounds.height)
     }
-
     /// Collection view did select item
     /// Call Picker view delegates
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
@@ -279,7 +283,7 @@ extension MBPickerView: UICollectionViewDelegateFlowLayout, UICollectionViewData
         if !showAllItem {
             reloadIndexes = collectionView.visibleIndexPath
         } else if indexPath != lastSelectedIndex {
-              reloadIndexes = [lastSelectedIndex, indexPath]
+            reloadIndexes = [lastSelectedIndex, indexPath]
         } else {
             reloadIndexes = [indexPath]
         }
@@ -287,33 +291,27 @@ extension MBPickerView: UICollectionViewDelegateFlowLayout, UICollectionViewData
         pickerCollectionView.reloadItems(at:reloadIndexes)
         delegate?.pickerView?(self, didSelectItem: indexPath.item)
     }
-
+    
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
-        return UIEdgeInsets(top: 0, left: titlePadding, bottom: 0, right: titlePadding)
+        return edgeInset
     }
-
     /// Scroll view delegate to manage select center item
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
         didScrollEnd(scrollView)
     }
-
     /// Scroll view delegate to manage select center item
     func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
-        if !decelerate {
-            didScrollEnd(scrollView)
-        }
+        if !decelerate { didScrollEnd(scrollView) }
     }
-
     /// Scroll view delegate to manage select center item
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         delegate?.pickerView?(self, didScroll: scrollView)
     }
-
     /// Select item which near to center of collection View
     func didScrollEnd(_ scrollView: UIScrollView) {
         delegate?.pickerView?(self, didScrollEnd: scrollView)
         var centerPoint = scrollView.contentOffset.x + (scrollView.bounds.width/2)
-        centerPoint = centerPoint - titlePadding
+        centerPoint = centerPoint - edgeInset.left
         let indexPath = IndexPath(item: Int(ceil(centerPoint/cellWidth))-1, section: 0)
         collectionView(pickerCollectionView, didSelectItemAt: indexPath)
     }
@@ -329,7 +327,6 @@ fileprivate class PickerCollectionView: UICollectionView {
         super.touchesBegan(touches, with: event)
         pickerView?.delegate?.pickerView?(pickerView!, didTouchBegan: touches)
     }
-
     /// Call delegate method to handle toches
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesEnded(touches, with: event)
@@ -343,9 +340,7 @@ fileprivate extension UICollectionView {
     var visibleIndexPath: [IndexPath] {
         var indexes: [IndexPath] = []
         for each in visibleCells {
-            if let indexPath = indexPath(for: each) {
-                indexes.append(indexPath)
-            }
+            if let indexPath = indexPath(for: each) { indexes.append(indexPath) }
         }
         return indexes
     }
@@ -353,7 +348,6 @@ fileprivate extension UICollectionView {
 
 // MARK: -
 private class PickerFlowLayout: UICollectionViewFlowLayout {
-
     /// Setup default values for flow layout
     override func prepare() {
         super.prepare()
@@ -374,7 +368,6 @@ fileprivate class CollectionCell: UICollectionViewCell {
             labelTitle?.frame = bounds
         }
     }
-
     /// Create label and default properties
     func setup(_ attribute: MBPickerViewTitleAttribute, selected: Bool) {
         if labelTitle == nil {
@@ -383,7 +376,6 @@ fileprivate class CollectionCell: UICollectionViewCell {
         }
         setAttributes(attribute: selected ? attribute.selectedAttribues : attribute.deselectedAttributes)
     }
-
     /// Set title attributes to UILable
     ///
     /// - Parameter attribute: PickerTitleAttributes
@@ -391,7 +383,6 @@ fileprivate class CollectionCell: UICollectionViewCell {
         labelTitle?.font = attribute.font
         labelTitle?.textColor = attribute.color
     }
-
     /// Update label frames
     override func layoutSubviews() {
         super.layoutSubviews()

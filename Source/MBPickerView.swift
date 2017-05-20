@@ -143,23 +143,17 @@ class MBPickerView: UIView {
     
     /// Set title padding scale to view left and right tiltle / view
     var titlePaddingScale: CGFloat = 0.8 {
-        didSet {
-            reloadData()
-        }
+        didSet { reloadData() }
     }
     
     /// Show all item in picker view, once set true titlePadding will not work here
     var showAllItem = false {
-        didSet {
-            reloadData()
-        }
+        didSet { reloadData() }
     }
     
     /// Set title text color for MBPicker View
     var titleAttributes: MBPickerViewTitleAttribute! = MBPickerViewTitleAttribute.defaultAttribute() {
-        didSet {
-            reloadData()
-        }
+        didSet { reloadData() }
     }
     
     /// Select a specific item in MBPickerView
@@ -181,9 +175,7 @@ class MBPickerView: UIView {
     
     /// Set to manupate and configure data set for pikcer view
     weak var dataSource: MBPickerViewDataSource? {
-        didSet{
-            reloadData()
-        }
+        didSet { reloadData() }
     }
     
     /// Reload data, it will call all the data source
@@ -196,7 +188,8 @@ class MBPickerView: UIView {
     
     /// Set title padding to view other item from Picker View
     fileprivate var titlePadding: CGFloat {
-        return showAllItem ? 0 : pickerCollectionView.bounds.width*titlePaddingScale/3
+        if showAllItem { return 0 }
+        return pickerCollectionView.bounds.width*titlePaddingScale/3
     }
     
     /// Number of item in picker
@@ -208,7 +201,7 @@ class MBPickerView: UIView {
     /// Calculate item width along with scale padding
     fileprivate var cellWidth: CGFloat {
         if showAllItem {
-            return   pickerCollectionView.bounds.width/CGFloat(itemCount)
+            return pickerCollectionView.bounds.width/CGFloat(itemCount)
         }
         return max(pickerCollectionView.bounds.width - (titlePadding*2), 0)
     }
@@ -282,14 +275,16 @@ extension MBPickerView: UICollectionViewDelegateFlowLayout, UICollectionViewData
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         delegate?.pickerView?(self, willSelectItem: indexPath.item)
         collectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: true)
-        var reloadInexdes: [IndexPath] = []
-        if showAllItem {
-            reloadInexdes = indexPath != lastSelectedIndex ? [lastSelectedIndex, indexPath]: [indexPath]
+        var reloadIndexes: [IndexPath] = []
+        if !showAllItem {
+            reloadIndexes = collectionView.visibleIndexPath
+        } else if indexPath != lastSelectedIndex {
+              reloadIndexes = [lastSelectedIndex, indexPath]
         } else {
-            reloadInexdes = collectionView.visibleIndexPath
+            reloadIndexes = [indexPath]
         }
         lastSelectedIndex = indexPath
-        pickerCollectionView.reloadItems(at:reloadInexdes)
+        pickerCollectionView.reloadItems(at:reloadIndexes)
         delegate?.pickerView?(self, didSelectItem: indexPath.item)
     }
     

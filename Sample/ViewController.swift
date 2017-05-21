@@ -33,7 +33,7 @@ class ViewController: UIViewController {
     
     @IBAction func sliderViewChanged(_ sender: UISlider) {
         if pagePickerView.currentItem != Int(sender.value) {
-            pagePickerView.selectItem(Int(sender.value))
+            pagePickerView.selectItem(Int(sender.value), animation: true)
             pagePickerView.reloadData()
         }
     }
@@ -49,6 +49,8 @@ extension ViewController: MBPickerViewDelegate, MBPickerViewDataSource {
     func pickerViewNumberOfItems(_ pickerView: MBPickerView) -> Int {
         pageSlider.maximumValue = max(0, Float(pageCount-1))
         pageScaleSlider.maximumValue = max(0, Float(pageCount-1))
+        pageScaleSlider.value = Float(pagePickerView.itemPadingScale)
+        labelPageScale.text = "Select page scale: \(pageScaleSlider.value)"
         return pageCount
     }
     

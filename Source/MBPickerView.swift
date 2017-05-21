@@ -159,10 +159,10 @@ class MBPickerView: UIView {
     /// - Parameter item: Int, must less than total item count
     /// - Returns: Bool, either item is selcted or not
     @discardableResult
-    func selectItem(_ item: Int) -> Bool {
+    func selectItem(_ item: Int, animation: Bool = false) -> Bool {
         if item >= 0 && item < itemCount {
-            let path = IndexPath(item: item, section: 0)
-            collectionView(pickerCollectionView, didSelectItemAt: path)
+            lastSelectedIndex = IndexPath(item: item, section: 0)
+            pickerCollectionView.scrollToItem(at: lastSelectedIndex!, at: .centeredHorizontally, animated: animation)
             return true
         }
         return false
@@ -328,17 +328,20 @@ extension MBPickerView: UICollectionViewDelegateFlowLayout, UICollectionViewData
     func centerIndex(scrollView: UIScrollView) -> IndexPath {
         var centerPoint = scrollView.contentOffset.x + (scrollView.bounds.width/2)
         centerPoint = centerPoint - edgeInset.left
-        let indexPath = IndexPath(item: Int(ceil(centerPoint/cellWidth))-1, section: 0)
+        let itemIndex = max(Int(ceil(centerPoint/cellWidth))-1, 0)
+        print(itemIndex)
+        let indexPath = IndexPath(item: min(itemIndex, itemCount-1), section: 0)
         return indexPath
     }
     /// Select item which near to center of collection View
     func didScrollEnd(_ scrollView: UIScrollView) {
         delegate?.pickerView?(self, didScrollEnd: scrollView)
-        if allowSelectionWhileScrolling, let index = lastSelectedIndex {
+        if !allowSelectionWhileScrolling {
+            lastSelectedIndex = centerIndex(scrollView: scrollView)
+        }
+        if let index = lastSelectedIndex {
             pickerCollectionView.scrollToItem(at: index, at: .centeredHorizontally, animated: true)
-        } else {
-            let indexPath = centerIndex(scrollView: scrollView)
-            collectionView(pickerCollectionView, didSelectItemAt: indexPath)
+            pickerCollectionView.reloadItems(at: pickerCollectionView.visibleIndexPath)
         }
     }
 }

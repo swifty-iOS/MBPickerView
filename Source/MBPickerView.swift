@@ -133,7 +133,7 @@ class MBPickerView: UIView {
         return index.item
     }
     
-    fileprivate var allowSelectionWhileScrolling: Bool = false
+    var allowSelectionWhileScrolling: Bool = false
     
     /// Show all item in picker view, once set true titlePadding will not work here
     var showAllItem = false {
@@ -315,7 +315,7 @@ extension MBPickerView: UIScrollViewDelegate {
     /// Scroll view delegate to manage select center item
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         delegate?.pickerView?(self, didScroll: scrollView)
-        if allowSelectionWhileScrolling {
+        if allowSelectionWhileScrolling, scrollView.isTracking {
             let indexPath = pickerCollectionView.centerIndex()
             if indexPath != lastSelectedIndex {
                 lastSelectedIndex = indexPath

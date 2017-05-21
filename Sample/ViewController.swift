@@ -23,6 +23,7 @@ class ViewController: UIViewController {
         pagePickerView.showAllItem = UIDevice.current.userInterfaceIdiom == .pad
         pagePickerView.delegate = self
         pagePickerView.dataSource = self
+        pagePickerView.allowSelectionWhileScrolling = false
         // Do any additional setup after loading the view, typically from a nib.
     }
     

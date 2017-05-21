@@ -34,7 +34,6 @@ class ViewController: UIViewController {
     @IBAction func sliderViewChanged(_ sender: UISlider) {
         if pagePickerView.currentItem != Int(sender.value) {
             pagePickerView.selectItem(Int(sender.value), animation: true)
-            pagePickerView.reloadData()
         }
     }
     

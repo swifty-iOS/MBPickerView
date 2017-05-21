@@ -13,11 +13,7 @@ struct PickerTitleAttributes {
     var color: UIColor!
     var font: UIFont!
     
-    /// Initialize Picker TitleAttributes
-    ///
-    /// - Parameters:
-    ///   - color: UIColor
-    ///   - font: UIFont
+    /// Initialize Picker Title Attributes
     init(color: UIColor, font: UIFont) {
         self.color = color
         self.font = font
@@ -30,18 +26,13 @@ struct MBPickerViewTitleAttribute {
     var deselectedAttributes: PickerTitleAttributes!
     
     /// Initialize selected and deselected attributes
-    ///
-    /// - Parameters:
-    ///   - selectedAttribues: PickerTitleAttributes
-    ///   - deselectedAttributes: PickerTitleAttributes
+    /// Which will displayed on pickerView items
     init(selectedAttribues: PickerTitleAttributes, deselectedAttributes: PickerTitleAttributes) {
         self.selectedAttribues = selectedAttribues
         self.deselectedAttributes = deselectedAttributes
     }
     
     /// Setting default title attibutes
-    ///
-    /// - Returns: MBPickerViewTitleAttribute
     fileprivate static func defaultAttribute() -> MBPickerViewTitleAttribute {
         return MBPickerViewTitleAttribute(
             selectedAttribues: PickerTitleAttributes(color: .black, font: UIFont.boldSystemFont(ofSize: 17)),
@@ -154,15 +145,19 @@ class MBPickerView: UIView {
         didSet { reloadData() }
     }
     
-    /// Select a specific item in MBPickerView
+    /// Select a specific item in MBPickerView with animation
     ///
-    /// - Parameter item: Int, must less than total item count
-    /// - Returns: Bool, either item is selcted or not
     @discardableResult
     func selectItem(_ item: Int, animation: Bool = false) -> Bool {
         if item >= 0 && item < itemCount {
-            lastSelectedIndex = IndexPath(item: item, section: 0)
-            pickerCollectionView.scrollToItem(at: lastSelectedIndex!, at: .centeredHorizontally, animated: animation)
+            let newIndex = IndexPath(item: item, section: 0)
+            pickerCollectionView.scrollToItem(at: newIndex, at: .centeredHorizontally, animated: animation)
+            var reloadIndex = pickerCollectionView.visibleIndexPath
+            if let index = lastSelectedIndex {
+                reloadIndex = prepareCellsToRealod(currentIndex: index, newIndex: newIndex)
+            }
+            lastSelectedIndex = newIndex
+            pickerCollectionView.reloadItems(at:reloadIndex)
             return true
         }
         return false
@@ -186,21 +181,22 @@ class MBPickerView: UIView {
     
     /// Calulate cell width and padding
     fileprivate func prepareForReload() {
-        if showAllItem {
-            cellWidth =  bounds.width/CGFloat(itemCount)
-            edgeInset = UIEdgeInsets.zero
-        } else if itemPadingScale >= 0 {
-            cellWidth =  max(bounds.width/((itemPadingScale*2)+1), bounds.width/CGFloat(itemCount))
-            let pading = (bounds.width/2) - (cellWidth/2)
-            edgeInset = UIEdgeInsets(top: 0, left: pading, bottom: 0, right: pading)
-        } else {
-            cellWidth = bounds.width
-            edgeInset = UIEdgeInsets.zero
+        if let flowLayout = pickerCollectionView.collectionViewLayout as? PickerFlowLayout {
+            if showAllItem {
+                let cellWidth =  bounds.width/CGFloat(itemCount)
+                flowLayout.itemSize = CGSize(width: cellWidth, height: bounds.height)
+                flowLayout.sectionInset = UIEdgeInsets.zero
+            } else if itemPadingScale >= 0 {
+                let cellWidth =  max(bounds.width/((itemPadingScale*2)+1), bounds.width/CGFloat(itemCount))
+                let pading = (bounds.width/2) - (cellWidth/2)
+                flowLayout.itemSize = CGSize(width: cellWidth, height: bounds.height)
+                flowLayout.sectionInset = UIEdgeInsets(top: 0, left: pading, bottom: 0, right: pading)
+            } else {
+                flowLayout.itemSize = CGSize(width: bounds.width, height: bounds.height)
+                flowLayout.sectionInset = UIEdgeInsets.zero
+            }
         }
     }
-    
-    /// Set title padding to view next to other item
-    fileprivate var edgeInset: UIEdgeInsets = UIEdgeInsets.zero
     
     /// Number of item in picker
     fileprivate var itemCount = 0
@@ -213,9 +209,6 @@ class MBPickerView: UIView {
             }
         }
     }
-    
-    /// Calculate item width along with scale padding
-    fileprivate var cellWidth: CGFloat = 0
     
     /// Collection View to view manage items
     fileprivate var pickerCollectionView =  PickerCollectionView(frame: .zero, collectionViewLayout: PickerFlowLayout())
@@ -242,11 +235,24 @@ class MBPickerView: UIView {
         pickerCollectionView.frame = bounds
         reloadData()
     }
+    
+    fileprivate func prepareCellsToRealod(currentIndex: IndexPath, newIndex: IndexPath) -> [IndexPath] {
+        var reloadIndexes: [IndexPath] = []
+        if !showAllItem {
+            reloadIndexes = pickerCollectionView.visibleIndexPath
+        } else if currentIndex != newIndex {
+            reloadIndexes = [newIndex, currentIndex]
+        } else {
+            reloadIndexes = [currentIndex]
+        }
+        return reloadIndexes
+    }
+    
 }
 
 // MARK: -
 
-extension MBPickerView: UICollectionViewDelegateFlowLayout, UICollectionViewDataSource, UIScrollViewDelegate {
+extension MBPickerView: UICollectionViewDelegateFlowLayout, UICollectionViewDataSource {
     
     // MARK: UICollectionView degate and Data Source
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
@@ -282,29 +288,22 @@ extension MBPickerView: UICollectionViewDelegateFlowLayout, UICollectionViewData
         }
         return UICollectionViewCell()
     }
-    /// Calulate size for item for UICollection view
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        return CGSize(width: cellWidth, height: collectionView.bounds.height)
-    }
+    
     /// Collection view did select item
-    /// Call Picker view delegates
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        var reloadIndexes: [IndexPath] = []
-        if !showAllItem {
-            reloadIndexes = collectionView.visibleIndexPath
-        } else if indexPath != lastSelectedIndex, let index = lastSelectedIndex {
-            reloadIndexes = [index, indexPath]
-        } else {
-            reloadIndexes = [indexPath]
+        collectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: true)
+        var reloadIndex = pickerCollectionView.visibleIndexPath
+        if let index = lastSelectedIndex {
+            reloadIndex = prepareCellsToRealod(currentIndex: index, newIndex: indexPath)
         }
         lastSelectedIndex = indexPath
-        pickerCollectionView.reloadItems(at:reloadIndexes)
-        collectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: true)
+        collectionView.reloadItems(at:reloadIndex)
     }
-    
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
-        return edgeInset
-    }
+}
+
+//MARK: -
+extension MBPickerView: UIScrollViewDelegate {
+    //MARK: UIScrollViewDelegate
     /// Scroll view delegate to manage select center item
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
         didScrollEnd(scrollView)
@@ -317,7 +316,7 @@ extension MBPickerView: UICollectionViewDelegateFlowLayout, UICollectionViewData
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         delegate?.pickerView?(self, didScroll: scrollView)
         if allowSelectionWhileScrolling {
-            let indexPath = centerIndex(scrollView: scrollView)
+            let indexPath = pickerCollectionView.centerIndex()
             if indexPath != lastSelectedIndex {
                 lastSelectedIndex = indexPath
                 pickerCollectionView.reloadItems(at: pickerCollectionView.visibleIndexPath)
@@ -325,19 +324,11 @@ extension MBPickerView: UICollectionViewDelegateFlowLayout, UICollectionViewData
         }
     }
     
-    func centerIndex(scrollView: UIScrollView) -> IndexPath {
-        var centerPoint = scrollView.contentOffset.x + (scrollView.bounds.width/2)
-        centerPoint = centerPoint - edgeInset.left
-        let itemIndex = max(Int(ceil(centerPoint/cellWidth))-1, 0)
-        print(itemIndex)
-        let indexPath = IndexPath(item: min(itemIndex, itemCount-1), section: 0)
-        return indexPath
-    }
     /// Select item which near to center of collection View
     func didScrollEnd(_ scrollView: UIScrollView) {
         delegate?.pickerView?(self, didScrollEnd: scrollView)
         if !allowSelectionWhileScrolling {
-            lastSelectedIndex = centerIndex(scrollView: scrollView)
+            lastSelectedIndex = pickerCollectionView.centerIndex()
         }
         if let index = lastSelectedIndex {
             pickerCollectionView.scrollToItem(at: index, at: .centeredHorizontally, animated: true)
@@ -361,9 +352,6 @@ fileprivate class PickerCollectionView: UICollectionView {
         super.touchesEnded(touches, with: event)
         pickerView?.delegate?.pickerView?(pickerView!, didTouchEnded: touches)
     }
-}
-// MARK: -
-fileprivate extension UICollectionView {
     
     /// Get all visible cell indexPath
     var visibleIndexPath: [IndexPath] {
@@ -373,6 +361,17 @@ fileprivate extension UICollectionView {
         }
         return indexes
     }
+    
+    func centerIndex() -> IndexPath? {
+        guard self.numberOfItems(inSection: 0) > 0, let flowLayout = collectionViewLayout as? PickerFlowLayout else { return nil }
+        
+        var centerPoint = self.contentOffset.x + (bounds.width/2)
+        centerPoint = centerPoint - flowLayout.sectionInset.left
+        let itemIndex = max(Int(ceil(centerPoint/flowLayout.itemSize.width))-1, 0)
+        let indexPath = IndexPath(item: min(itemIndex, self.numberOfItems(inSection: 0)-1), section: 0)
+        return indexPath
+    }
+    
 }
 
 // MARK: -

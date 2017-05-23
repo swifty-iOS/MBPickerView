@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		132525401ED4A51E00932A96 /* PickerCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1325253F1ED4A51E00932A96 /* PickerCell.swift */; };
+		132525421ED4A53000932A96 /* PickerCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 132525411ED4A53000932A96 /* PickerCell.xib */; };
 		13419B4A1EC8D218005567F0 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13419B491EC8D218005567F0 /* AppDelegate.swift */; };
 		13419B4C1EC8D218005567F0 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13419B4B1EC8D218005567F0 /* ViewController.swift */; };
 		13419B4F1EC8D218005567F0 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 13419B4D1EC8D218005567F0 /* Main.storyboard */; };
@@ -17,6 +19,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		1325253F1ED4A51E00932A96 /* PickerCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PickerCell.swift; sourceTree = "<group>"; };
+		132525411ED4A53000932A96 /* PickerCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PickerCell.xib; sourceTree = "<group>"; };
 		13419B461EC8D218005567F0 /* Sample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Sample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13419B491EC8D218005567F0 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		13419B4B1EC8D218005567F0 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -66,6 +70,8 @@
 				13ACF34F1EC8E05C003D1DA9 /* Source */,
 				13419B491EC8D218005567F0 /* AppDelegate.swift */,
 				13419B4B1EC8D218005567F0 /* ViewController.swift */,
+				1325253F1ED4A51E00932A96 /* PickerCell.swift */,
+				132525411ED4A53000932A96 /* PickerCell.xib */,
 				13419B4D1EC8D218005567F0 /* Main.storyboard */,
 				13419B501EC8D218005567F0 /* Assets.xcassets */,
 				13419B521EC8D218005567F0 /* LaunchScreen.storyboard */,
@@ -162,6 +168,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				13419B541EC8D218005567F0 /* LaunchScreen.storyboard in Resources */,
+				132525421ED4A53000932A96 /* PickerCell.xib in Resources */,
 				13419B511EC8D218005567F0 /* Assets.xcassets in Resources */,
 				13419B4F1EC8D218005567F0 /* Main.storyboard in Resources */,
 			);
@@ -223,6 +230,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				13419B4C1EC8D218005567F0 /* ViewController.swift in Sources */,
+				132525401ED4A51E00932A96 /* PickerCell.swift in Sources */,
 				13419B4A1EC8D218005567F0 /* AppDelegate.swift in Sources */,
 				13ACF3511EC8E05C003D1DA9 /* MBPickerView.swift in Sources */,
 			);

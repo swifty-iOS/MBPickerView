@@ -133,6 +133,8 @@ class MBPickerView: UIView {
         return index.item
     }
     
+    /// Enable selection while scrolling picker
+    /// It will have performance imapct and will reload on very scroll item selected
     var allowSelectionWhileScrolling: Bool = false
     
     /// Show all item in picker view, once set true titlePadding will not work here
@@ -145,22 +147,32 @@ class MBPickerView: UIView {
         didSet { reloadData() }
     }
     
+    fileprivate var pendingSelectionItem = (-1, false)
     /// Select a specific item in MBPickerView with animation
     ///
-    @discardableResult
-    func selectItem(_ item: Int, animation: Bool = false) -> Bool {
-        if item >= 0 && item < itemCount {
-            let newIndex = IndexPath(item: item, section: 0)
-            pickerCollectionView.scrollToItem(at: newIndex, at: .centeredHorizontally, animated: animation)
+    func selectItem(_ item: Int, animation: Bool = false) {
+        pendingSelectionItem = (item, animation)
+        selectPendingItem()
+    }
+    
+    fileprivate func selectPendingItem() {
+        if pendingSelectionItem.0 >= 0, pendingSelectionItem.0 >= 0 && pendingSelectionItem.0 < itemCount {
+            let newIndex = IndexPath(item: pendingSelectionItem.0, section: 0)
+            pickerCollectionView.scrollToItem(at: newIndex, at: .centeredHorizontally, animated: pendingSelectionItem.1)
             var reloadIndex = pickerCollectionView.visibleIndexPath
             if let index = lastSelectedIndex {
                 reloadIndex = prepareCellsToRealod(currentIndex: index, newIndex: newIndex)
             }
+            pendingSelectionItem = (-1, false)
             lastSelectedIndex = newIndex
             pickerCollectionView.reloadItems(at:reloadIndex)
-            return true
+            
+        } else if itemCount > 0, lastSelectedIndex == nil {
+            lastSelectedIndex = IndexPath(item: 0, section: 0)
         }
-        return false
+    }
+    func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+        cell.layoutIfNeeded()
     }
     
     /// Set delegate to get call back of various events
@@ -176,6 +188,8 @@ class MBPickerView: UIView {
         pickerCollectionView.reloadData()
         if itemCount > 0, let index = lastSelectedIndex {
             pickerCollectionView.scrollToItem(at: index, at: .centeredHorizontally, animated: false)
+        } else if itemCount > 0 {
+            selectPendingItem()
         }
     }
     
@@ -260,23 +274,27 @@ extension MBPickerView: UICollectionViewDelegateFlowLayout, UICollectionViewData
         if let count = dataSource?.pickerViewNumberOfItems(self), count > 0 {
             itemCount = count
         }
-        if itemCount > 0, lastSelectedIndex == nil {
-            lastSelectedIndex = IndexPath(item: 0, section: 0)
-        }
         prepareForReload()
         return itemCount
     }
     /// Set cell for UICollection View
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         if let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "CollectionCell", for: indexPath) as? CollectionCell {
-            
-            if let view = dataSource?.pickerView?(self, viewAtItem: indexPath.item) {
-                view.frame = CGRect(x: 0, y: 0, width: cell.bounds.width, height: cell.bounds.height)
-                cell.addSubview(view)
+            for each in cell.subviews {
+                each.removeFromSuperview()
+            }
+            if let newView = dataSource?.pickerView?(self, viewAtItem: indexPath.item) {
+                newView.translatesAutoresizingMaskIntoConstraints = false
+                cell.addSubview(newView)
+                let horizontalConstraint = NSLayoutConstraint(item: newView, attribute: NSLayoutAttribute.centerX, relatedBy: NSLayoutRelation.equal, toItem: cell, attribute: NSLayoutAttribute.centerX, multiplier: 1, constant: 0)
+                let verticalConstraint = NSLayoutConstraint(item: newView, attribute: NSLayoutAttribute.centerY, relatedBy: NSLayoutRelation.equal, toItem: cell, attribute: NSLayoutAttribute.centerY, multiplier: 1, constant: 0)
+                let leading = NSLayoutConstraint(item: newView, attribute: .leading, relatedBy: .equal, toItem: cell, attribute: .leading, multiplier: 1, constant: 0)
+                let top = NSLayoutConstraint(item: newView, attribute: .top, relatedBy: .equal, toItem: cell, attribute: .top, multiplier: 1, constant: 0)
+                NSLayoutConstraint.activate([horizontalConstraint, verticalConstraint, leading, top])
                 return cell
             }
             
-            // Set up default titles delegat
+            // Set up default titles delegate
             cell.setup(titleAttributes, selected: lastSelectedIndex == indexPath)
             cell.labelTitle?.text = dataSource?.pickerView?(self, titleAtItem: indexPath.item)
             if let bgColor = dataSource?.pickerView?(self, titleBackgroundColorAtItem: indexPath.item) {
@@ -398,16 +416,14 @@ fileprivate class CollectionCell: UICollectionViewCell {
     }
     /// Create label and default properties
     func setup(_ attribute: MBPickerViewTitleAttribute, selected: Bool) {
-        if labelTitle == nil {
-            labelTitle = UILabel()
-            addSubview(labelTitle!)
-        }
+        if labelTitle == nil { labelTitle = UILabel() }
+        if labelTitle?.superview == nil { addSubview(labelTitle!) }
         setAttributes(attribute: selected ? attribute.selectedAttribues : attribute.deselectedAttributes)
     }
     /// Set title attributes to UILable
     ///
     /// - Parameter attribute: PickerTitleAttributes
-    func setAttributes(attribute: PickerTitleAttributes) {
+    private func setAttributes(attribute: PickerTitleAttributes) {
         labelTitle?.font = attribute.font
         labelTitle?.textColor = attribute.color
     }

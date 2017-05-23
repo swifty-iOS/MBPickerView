@@ -8,6 +8,26 @@
 
 import UIKit
 
+struct AppName {
+    var title: String = ""
+    var image: UIImage?
+    
+    static func defaultApps() -> [AppName] {
+        return [AppName(title: "Amazon", image: #imageLiteral(resourceName: "Amazon")),
+        AppName(title: "Android", image: #imageLiteral(resourceName: "Android")),
+        AppName(title: "Blackberry", image: #imageLiteral(resourceName: "Blackberry")),
+        AppName(title: "Chrome", image: #imageLiteral(resourceName: "Chrome")),
+        AppName(title: "Facebook", image: #imageLiteral(resourceName: "Facebook")),
+        AppName(title: "Google Drive", image: #imageLiteral(resourceName: "GoogleDrive")),
+        AppName(title: "Messenger", image: #imageLiteral(resourceName: "Messenger")),
+        AppName(title: "Twitter", image: #imageLiteral(resourceName: "Twitter")),
+        AppName(title: "Whats app", image: #imageLiteral(resourceName: "Whatsapp")),
+        AppName(title: "Youtube", image: #imageLiteral(resourceName: "Youtube"))]
+    }
+}
+
+
+
 class ViewController: UIViewController {
     
     @IBOutlet weak var label: UILabel!
@@ -16,14 +36,17 @@ class ViewController: UIViewController {
     @IBOutlet weak var pageScaleSlider: UISlider!
     
     @IBOutlet weak var labelPageScale: UILabel!
-    let pageCount = 10
+    let apps = AppName.defaultApps()
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        pagePickerView.selectItem(2, animation: false)
         pagePickerView.showAllItem = UIDevice.current.userInterfaceIdiom == .pad
         pagePickerView.delegate = self
         pagePickerView.dataSource = self
         pagePickerView.allowSelectionWhileScrolling = false
+       // pagePickerView.selectItem(2, animation: true)
+        
         // Do any additional setup after loading the view, typically from a nib.
     }
     
@@ -47,11 +70,22 @@ class ViewController: UIViewController {
 extension ViewController: MBPickerViewDelegate, MBPickerViewDataSource {
     
     func pickerViewNumberOfItems(_ pickerView: MBPickerView) -> Int {
-        pageSlider.maximumValue = max(0, Float(pageCount-1))
-        pageScaleSlider.maximumValue = max(0, Float(pageCount-1))
+        pageSlider.maximumValue = max(0, Float(apps.count-1))
+        pageScaleSlider.maximumValue = max(0, Float(apps.count-1))
         pageScaleSlider.value = Float(pagePickerView.itemPadingScale)
         labelPageScale.text = "Select page scale: \(pageScaleSlider.value)"
-        return pageCount
+        return apps.count
+    }
+    
+    func pickerView(_ pickerView: MBPickerView, viewAtItem item: Int) -> UIView {
+        if let view =  PickerCell.loadFromNib() {
+            view.imageView.image = apps[item].image
+            view.labelTitle.text = apps[item].title
+            view.alpha = pickerView.currentItem == item ? 1 : 0.5
+            view.backgroundColor = .clear
+            return view
+        }
+        return UIView()
     }
     
     func pickerView(_ pickerView: MBPickerView, titleAtItem item: Int) -> String {

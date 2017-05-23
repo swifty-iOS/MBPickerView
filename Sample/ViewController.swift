@@ -81,7 +81,7 @@ extension ViewController: MBPickerViewDelegate, MBPickerViewDataSource {
         if let view =  PickerCell.loadFromNib() {
             view.imageView.image = apps[item].image
             view.labelTitle.text = apps[item].title
-            view.alpha = pickerView.currentItem == item ? 1 : 0.5
+            view.alpha = pickerView.currentItem == item ? 1 : 0.3
             view.backgroundColor = .clear
             return view
         }

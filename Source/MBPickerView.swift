@@ -133,6 +133,8 @@ class MBPickerView: UIView {
         return index.item
     }
     
+    /// Enable selection while scrolling picker
+    /// It will have performance imapct and will reload on very scroll item selected
     var allowSelectionWhileScrolling: Bool = false
     
     /// Show all item in picker view, once set true titlePadding will not work here
@@ -281,9 +283,14 @@ extension MBPickerView: UICollectionViewDelegateFlowLayout, UICollectionViewData
             for each in cell.subviews {
                 each.removeFromSuperview()
             }
-            if let view = dataSource?.pickerView?(self, viewAtItem: indexPath.item) {
-                view.frame = CGRect(x: 0, y: 0, width: cell.bounds.width, height: cell.bounds.height)
-                cell.addSubview(view)
+            if let newView = dataSource?.pickerView?(self, viewAtItem: indexPath.item) {
+                newView.translatesAutoresizingMaskIntoConstraints = false
+                cell.addSubview(newView)
+                let horizontalConstraint = NSLayoutConstraint(item: newView, attribute: NSLayoutAttribute.centerX, relatedBy: NSLayoutRelation.equal, toItem: cell, attribute: NSLayoutAttribute.centerX, multiplier: 1, constant: 0)
+                let verticalConstraint = NSLayoutConstraint(item: newView, attribute: NSLayoutAttribute.centerY, relatedBy: NSLayoutRelation.equal, toItem: cell, attribute: NSLayoutAttribute.centerY, multiplier: 1, constant: 0)
+                let leading = NSLayoutConstraint(item: newView, attribute: .leading, relatedBy: .equal, toItem: cell, attribute: .leading, multiplier: 1, constant: 0)
+                let top = NSLayoutConstraint(item: newView, attribute: .top, relatedBy: .equal, toItem: cell, attribute: .top, multiplier: 1, constant: 0)
+                NSLayoutConstraint.activate([horizontalConstraint, verticalConstraint, leading, top])
                 return cell
             }
             

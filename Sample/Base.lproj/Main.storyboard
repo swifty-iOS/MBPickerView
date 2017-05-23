@@ -22,14 +22,14 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="UEk-0Y-6Dw" customClass="MBPickerView" customModule="Sample" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="50" width="375" height="30"/>
-                                <color key="backgroundColor" white="0.0" alpha="0.75563930457746475" colorSpace="calibratedWhite"/>
+                                <rect key="frame" x="0.0" y="50" width="375" height="50"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                 <constraints>
-                                    <constraint firstAttribute="height" constant="30" id="cXx-8c-CqK"/>
+                                    <constraint firstAttribute="height" constant="50" id="cXx-8c-CqK"/>
                                 </constraints>
                             </view>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="9rb-Rm-KpU">
-                                <rect key="frame" x="16" y="110" width="343" height="24"/>
+                                <rect key="frame" x="16" y="130" width="343" height="24"/>
                                 <constraints>
                                     <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="21" id="Llv-bT-AKh"/>
                                 </constraints>
@@ -38,25 +38,25 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Select Page" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="aQn-ko-7IB">
-                                <rect key="frame" x="16" y="159" width="343" height="21"/>
+                                <rect key="frame" x="16" y="179" width="343" height="21"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" minValue="0.0" maxValue="1" translatesAutoresizingMaskIntoConstraints="NO" id="oIY-IR-gjb">
-                                <rect key="frame" x="14" y="195" width="347" height="31"/>
+                                <rect key="frame" x="14" y="215" width="347" height="31"/>
                                 <connections>
                                     <action selector="sliderViewChanged:" destination="BYZ-38-t0r" eventType="valueChanged" id="7VB-Hg-Rmf"/>
                                 </connections>
                             </slider>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Select page scale : 0" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="LJQ-In-714">
-                                <rect key="frame" x="16" y="250" width="343" height="21"/>
+                                <rect key="frame" x="16" y="270" width="343" height="21"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" minValue="0.0" maxValue="10" translatesAutoresizingMaskIntoConstraints="NO" id="ybk-nF-cb7">
-                                <rect key="frame" x="14" y="286" width="347" height="31"/>
+                                <rect key="frame" x="14" y="306" width="347" height="31"/>
                                 <connections>
                                     <action selector="pageScaleChange:" destination="BYZ-38-t0r" eventType="valueChanged" id="DMa-3J-TRF"/>
                                 </connections>

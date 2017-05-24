@@ -19,7 +19,7 @@
                     <rect key="frame" x="10" y="106" width="254" height="89"/>
                     <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                     <constraints>
-                        <constraint firstAttribute="height" relation="greaterThanOrEqual" id="YrV-fW-2nW"/>
+                        <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="20" id="YrV-fW-2nW"/>
                     </constraints>
                     <fontDescription key="fontDescription" type="system" pointSize="13"/>
                     <nil key="textColor"/>

@@ -144,8 +144,11 @@ struct MBPickerViewTitleAttribute {
 // MARK: -
 
 /// This Picker class which give veticle picker view same UIPickerView
-class MBPickerView: UIView {
+public class MBPickerView: UIView {
     
+    public override init(frame: CGRect) {
+        super.init(frame: frame)
+    }
     /// Set title padding scale to view left and right tiltle / view
     var itemPadingScale: CGFloat = 0.5 {
         didSet { reloadData() }
@@ -195,7 +198,7 @@ class MBPickerView: UIView {
             lastSelectedIndex = IndexPath(item: 0, section: 0)
         }
     }
-    func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+    public func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         cell.layoutIfNeeded()
     }
     
@@ -255,7 +258,7 @@ class MBPickerView: UIView {
     /// Collection View to view manage items
     fileprivate var pickerCollectionView =  PickerCollectionView(frame: .zero, collectionViewLayout: PickerFlowLayout())
     
-    required init?(coder aDecoder: NSCoder) {
+    required public init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         initialSetup()
     }
@@ -272,7 +275,7 @@ class MBPickerView: UIView {
     }
     
     /// Adjust frame of collection view and reload data
-    override func layoutSubviews() {
+    override public func layoutSubviews() {
         super.layoutSubviews()
         pickerCollectionView.frame = bounds
         reloadData()
@@ -297,7 +300,7 @@ class MBPickerView: UIView {
 extension MBPickerView: UICollectionViewDelegateFlowLayout, UICollectionViewDataSource {
     
     // MARK: UICollectionView degate and Data Source
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+    public func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         itemCount = 0
         if let count = dataSource?.pickerViewNumberOfItems(self), count > 0 {
             itemCount = count
@@ -306,7 +309,7 @@ extension MBPickerView: UICollectionViewDelegateFlowLayout, UICollectionViewData
         return itemCount
     }
     /// Set cell for UICollection View
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+    public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         if let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "CollectionCell", for: indexPath) as? CollectionCell {
             for each in cell.subviews {
                 each.removeFromSuperview()
@@ -336,7 +339,7 @@ extension MBPickerView: UICollectionViewDelegateFlowLayout, UICollectionViewData
     }
     
     /// Collection view did select item
-    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+    public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         collectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: true)
         var reloadIndex = pickerCollectionView.visibleIndexPath
         if let index = lastSelectedIndex {
@@ -351,15 +354,15 @@ extension MBPickerView: UICollectionViewDelegateFlowLayout, UICollectionViewData
 extension MBPickerView: UIScrollViewDelegate {
     //MARK: UIScrollViewDelegate
     /// Scroll view delegate to manage select center item
-    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+    public func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
         didScrollEnd(scrollView)
     }
     /// Scroll view delegate to manage select center item
-    func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+    public func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
         if !decelerate { didScrollEnd(scrollView) }
     }
     /// Scroll view delegate to manage select center item
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+    public func scrollViewDidScroll(_ scrollView: UIScrollView) {
         delegate?.pickerView?(self, didScroll: scrollView)
         if allowSelectionWhileScrolling, scrollView.isTracking {
             let indexPath = pickerCollectionView.centerIndex()

@@ -35,6 +35,8 @@ class ViewController: UIViewController {
     @IBOutlet weak var pageSlider: UISlider!
     @IBOutlet weak var pageScaleSlider: UISlider!
     
+    @IBOutlet weak var pickerLeftPadding: NSLayoutConstraint!
+    @IBOutlet weak var pickerHeight: NSLayoutConstraint!
     @IBOutlet weak var labelPageScale: UILabel!
     let apps = AppName.defaultApps()
     
@@ -53,6 +55,17 @@ class ViewController: UIViewController {
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
+    }
+    @IBAction func directionChanged(_ sender: UISegmentedControl) {
+        if sender.selectedSegmentIndex == 0 {
+            pagePickerView.direction = .vertical
+            pickerHeight.constant = 250
+            pickerLeftPadding.constant = (view.bounds.width - 64)/2
+        } else {
+            pagePickerView.direction = .horizontal
+            pickerHeight.constant = 64
+            pickerLeftPadding.constant = 0
+        }
     }
     
     @IBAction func sliderViewChanged(_ sender: UISlider) {

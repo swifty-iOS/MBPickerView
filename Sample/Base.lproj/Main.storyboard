@@ -22,7 +22,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="9rb-Rm-KpU">
-                                <rect key="frame" x="16" y="114" width="343" height="24"/>
+                                <rect key="frame" x="16" y="162" width="343" height="24"/>
                                 <constraints>
                                     <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="21" id="Llv-bT-AKh"/>
                                 </constraints>
@@ -31,43 +31,56 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Select Page" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="aQn-ko-7IB">
-                                <rect key="frame" x="16" y="163" width="343" height="21"/>
+                                <rect key="frame" x="16" y="211" width="343" height="21"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" minValue="0.0" maxValue="1" translatesAutoresizingMaskIntoConstraints="NO" id="oIY-IR-gjb">
-                                <rect key="frame" x="14" y="199" width="347" height="31"/>
+                                <rect key="frame" x="14" y="247" width="347" height="31"/>
                                 <connections>
                                     <action selector="sliderViewChanged:" destination="BYZ-38-t0r" eventType="valueChanged" id="7VB-Hg-Rmf"/>
                                 </connections>
                             </slider>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Select page scale : 0" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="LJQ-In-714">
-                                <rect key="frame" x="16" y="254" width="343" height="21"/>
+                                <rect key="frame" x="16" y="302" width="343" height="21"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" minValue="0.0" maxValue="10" translatesAutoresizingMaskIntoConstraints="NO" id="ybk-nF-cb7">
-                                <rect key="frame" x="14" y="290" width="347" height="31"/>
+                                <rect key="frame" x="14" y="338" width="347" height="31"/>
                                 <connections>
                                     <action selector="pageScaleChange:" destination="BYZ-38-t0r" eventType="valueChanged" id="DMa-3J-TRF"/>
                                 </connections>
                             </slider>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="xyl-CL-BJl">
-                                <rect key="frame" x="0.0" y="84" width="375" height="1"/>
+                                <rect key="frame" x="0.0" y="132" width="375" height="1"/>
                                 <color key="backgroundColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="1" id="UPG-FC-y0i"/>
                                 </constraints>
                             </view>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="UEk-0Y-6Dw" customClass="MBPickerView" customModule="Sample" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="20" width="375" height="64"/>
-                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                                <rect key="frame" x="0.0" y="68" width="375" height="64"/>
+                                <color key="backgroundColor" red="1" green="0.94950509039999997" blue="0.073996610330000004" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="64" id="cXx-8c-CqK"/>
                                 </constraints>
                             </view>
+                            <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="1" translatesAutoresizingMaskIntoConstraints="NO" id="wQ4-hC-K83">
+                                <rect key="frame" x="87.5" y="20" width="200" height="29"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="200" id="aDN-Ju-wuo"/>
+                                </constraints>
+                                <segments>
+                                    <segment title="Vertical"/>
+                                    <segment title="Horizontal"/>
+                                </segments>
+                                <connections>
+                                    <action selector="directionChanged:" destination="BYZ-38-t0r" eventType="valueChanged" id="SRu-H6-fj9"/>
+                                </connections>
+                            </segmentedControl>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
@@ -78,8 +91,11 @@
                             <constraint firstItem="oIY-IR-gjb" firstAttribute="centerX" secondItem="aQn-ko-7IB" secondAttribute="centerX" id="Kmv-86-DHV"/>
                             <constraint firstItem="9rb-Rm-KpU" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="Kx5-Tp-SyC"/>
                             <constraint firstItem="oIY-IR-gjb" firstAttribute="width" secondItem="aQn-ko-7IB" secondAttribute="width" id="Puj-Tk-tJE"/>
+                            <constraint firstItem="wQ4-hC-K83" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" id="QeN-pe-gWL"/>
                             <constraint firstItem="aQn-ko-7IB" firstAttribute="top" secondItem="9rb-Rm-KpU" secondAttribute="bottom" constant="25" id="QnZ-FS-tyE"/>
                             <constraint firstItem="aQn-ko-7IB" firstAttribute="width" secondItem="9rb-Rm-KpU" secondAttribute="width" id="Xpo-p1-Mn9"/>
+                            <constraint firstItem="UEk-0Y-6Dw" firstAttribute="top" secondItem="wQ4-hC-K83" secondAttribute="bottom" constant="20" id="aJY-VA-LzA"/>
+                            <constraint firstItem="wQ4-hC-K83" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="anf-dw-Gt4"/>
                             <constraint firstItem="UEk-0Y-6Dw" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="dug-HE-X5q"/>
                             <constraint firstItem="ybk-nF-cb7" firstAttribute="top" secondItem="LJQ-In-714" secondAttribute="bottom" constant="15" id="epa-vH-e6P"/>
                             <constraint firstItem="xyl-CL-BJl" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="fL0-L2-AJ7"/>
@@ -90,7 +106,6 @@
                             <constraint firstItem="aQn-ko-7IB" firstAttribute="centerX" secondItem="9rb-Rm-KpU" secondAttribute="centerX" id="m8A-7s-UcR"/>
                             <constraint firstItem="LJQ-In-714" firstAttribute="top" secondItem="oIY-IR-gjb" secondAttribute="bottom" constant="25" id="oWy-wg-chs"/>
                             <constraint firstItem="ybk-nF-cb7" firstAttribute="width" secondItem="LJQ-In-714" secondAttribute="width" id="vBZ-D5-9ba"/>
-                            <constraint firstItem="UEk-0Y-6Dw" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="top" constant="20" id="vdL-7r-pFU"/>
                             <constraint firstItem="oIY-IR-gjb" firstAttribute="top" secondItem="aQn-ko-7IB" secondAttribute="bottom" constant="15" id="z4h-kU-dN2"/>
                         </constraints>
                     </view>
@@ -100,6 +115,8 @@
                         <outlet property="pagePickerView" destination="UEk-0Y-6Dw" id="ZGQ-8B-l5F"/>
                         <outlet property="pageScaleSlider" destination="ybk-nF-cb7" id="KPf-1Y-Y8J"/>
                         <outlet property="pageSlider" destination="oIY-IR-gjb" id="sL8-OT-Wa9"/>
+                        <outlet property="pickerHeight" destination="cXx-8c-CqK" id="u3i-HZ-ifH"/>
+                        <outlet property="pickerLeftPadding" destination="kHW-x8-1qQ" id="z2j-gI-oWN"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>

@@ -8,17 +8,17 @@
 // ---------------------------------------------------------------------------
 //
 // Copyright (c) 2017 Manish
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in all
 // copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -149,6 +149,23 @@ public class MBPickerView: UIView {
     public override init(frame: CGRect) {
         super.init(frame: frame)
     }
+    
+    // Set scroll direction for Picker view
+    var direction: UICollectionViewScrollDirection = .vertical {
+        didSet {
+            if let flowLayout = flowLayout {
+                flowLayout.scrollDirection = direction
+                pickerCollectionView.collectionViewLayout = flowLayout
+                reloadData()
+            }
+        }
+    }
+    
+    fileprivate var flowLayout: PickerFlowLayout? {
+        guard let flowLayout = pickerCollectionView.collectionViewLayout as? PickerFlowLayout else { return nil }
+        return flowLayout
+    }
+    
     /// Set title padding scale to view left and right tiltle / view
     var itemPadingScale: CGFloat = 0.5 {
         didSet { reloadData() }
@@ -183,9 +200,9 @@ public class MBPickerView: UIView {
     }
     
     fileprivate func selectPendingItem() {
-        if pendingSelectionItem.index >= 0, pendingSelectionItem.index < itemCount {
+        if pendingSelectionItem.index >= 0, pendingSelectionItem.index < itemCount, let flowLayout = flowLayout {
             let newIndex = IndexPath(item: pendingSelectionItem.index, section: 0)
-            pickerCollectionView.scrollToItem(at: newIndex, at: .centeredHorizontally, animated: pendingSelectionItem.animation)
+            pickerCollectionView.scrollToItem(at: newIndex, at: flowLayout.scrollPosition, animated: pendingSelectionItem.animation)
             var reloadIndex = pickerCollectionView.visibleIndexPath
             if let index = lastSelectedIndex {
                 reloadIndex = prepareCellsToRealod(currentIndex: index, newIndex: newIndex)
@@ -197,9 +214,6 @@ public class MBPickerView: UIView {
         } else if itemCount > 0, lastSelectedIndex == nil {
             lastSelectedIndex = IndexPath(item: 0, section: 0)
         }
-    }
-    public func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-        cell.layoutIfNeeded()
     }
     
     /// Set delegate to get call back of various events
@@ -213,10 +227,10 @@ public class MBPickerView: UIView {
     /// Reload data, it will call all the data source
     public func reloadData() {
         pickerCollectionView.reloadData()
-        DispatchQueue.global(qos: .userInteractive).async {
+        DispatchQueue.global(qos: .userInteractive).async { [unowned self] in
             DispatchQueue.main.async { [unowned self] in
-                if self.itemCount > 0, let index = self.lastSelectedIndex {
-                    self.pickerCollectionView.scrollToItem(at: index, at: .centeredHorizontally, animated: false)
+                if self.itemCount > 0, let index = self.lastSelectedIndex, let flowLayout = self.flowLayout {
+                    self.pickerCollectionView.scrollToItem(at: index, at: flowLayout.scrollPosition, animated: false)
                 } else if self.itemCount > 0 {
                     self.selectPendingItem()
                 }
@@ -226,20 +240,43 @@ public class MBPickerView: UIView {
     
     /// Calulate cell width and padding
     fileprivate func prepareForReload() {
-        if let flowLayout = pickerCollectionView.collectionViewLayout as? PickerFlowLayout {
-            if showAllItem {
-                let cellWidth =  bounds.width/CGFloat(itemCount)
-                flowLayout.itemSize = CGSize(width: cellWidth, height: bounds.height)
-                flowLayout.sectionInset = UIEdgeInsets.zero
-            } else if itemPadingScale >= 0 {
-                let cellWidth =  max(bounds.width/((itemPadingScale*2)+1), bounds.width/CGFloat(itemCount))
-                let pading = (bounds.width/2) - (cellWidth/2)
-                flowLayout.itemSize = CGSize(width: cellWidth, height: bounds.height)
-                flowLayout.sectionInset = UIEdgeInsets(top: 0, left: pading, bottom: 0, right: pading)
-            } else {
-                flowLayout.itemSize = CGSize(width: bounds.width, height: bounds.height)
-                flowLayout.sectionInset = UIEdgeInsets.zero
+        if let flowLayout = flowLayout {
+            switch flowLayout.scrollDirection {
+            case .vertical: setupVerticalLayout(flowLayout)
+            case .horizontal: setupHorizontalLayout(flowLayout)
             }
+        }
+    }
+    
+    private func setupVerticalLayout(_ flowLayout: PickerFlowLayout) {
+        if showAllItem {
+            let cellHeight =  bounds.height/CGFloat(itemCount)
+            flowLayout.itemSize = CGSize(width: bounds.width, height: cellHeight)
+            flowLayout.sectionInset = UIEdgeInsets.zero
+        } else if itemPadingScale >= 0 {
+            let cellHeight =  max(bounds.height/((itemPadingScale*2)+1), bounds.height/CGFloat(itemCount))
+            let pading = (bounds.height/2) - (cellHeight/2)
+            flowLayout.itemSize = CGSize(width: bounds.width, height: cellHeight)
+            flowLayout.sectionInset = UIEdgeInsets(top: pading, left: 0, bottom: pading, right: 0)
+        } else {
+            flowLayout.itemSize = CGSize(width: bounds.width, height: bounds.height)
+            flowLayout.sectionInset = UIEdgeInsets.zero
+        }
+    }
+    
+    private func setupHorizontalLayout(_ flowLayout: PickerFlowLayout) {
+        if showAllItem {
+            let cellWidth =  bounds.width/CGFloat(itemCount)
+            flowLayout.itemSize = CGSize(width: cellWidth, height: bounds.height)
+            flowLayout.sectionInset = UIEdgeInsets.zero
+        } else if itemPadingScale >= 0 {
+            let cellWidth =  max(bounds.width/((itemPadingScale*2)+1), bounds.width/CGFloat(itemCount))
+            let pading = (bounds.width/2) - (cellWidth/2)
+            flowLayout.itemSize = CGSize(width: cellWidth, height: bounds.height)
+            flowLayout.sectionInset = UIEdgeInsets(top: 0, left: pading, bottom: 0, right: pading)
+        } else {
+            flowLayout.itemSize = CGSize(width: bounds.width, height: bounds.height)
+            flowLayout.sectionInset = UIEdgeInsets.zero
         }
     }
     
@@ -256,7 +293,7 @@ public class MBPickerView: UIView {
     }
     
     /// Collection View to view manage items
-    fileprivate var pickerCollectionView =  PickerCollectionView(frame: .zero, collectionViewLayout: PickerFlowLayout())
+    fileprivate var pickerCollectionView =  PickerCollectionView(frame: .zero, collectionViewLayout: PickerFlowLayout.defaultLayout())
     
     required public init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
@@ -268,6 +305,7 @@ public class MBPickerView: UIView {
         pickerCollectionView.pickerView = self
         pickerCollectionView.backgroundColor = UIColor.clear
         pickerCollectionView.showsHorizontalScrollIndicator = false
+        pickerCollectionView.showsVerticalScrollIndicator = false
         pickerCollectionView.register(CollectionCell.self, forCellWithReuseIdentifier: "CollectionCell")
         addSubview(pickerCollectionView)
         pickerCollectionView.dataSource = self
@@ -340,7 +378,9 @@ extension MBPickerView: UICollectionViewDelegateFlowLayout, UICollectionViewData
     
     /// Collection view did select item
     public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        collectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: true)
+        if let flowLayout = flowLayout {
+            collectionView.scrollToItem(at: indexPath, at: flowLayout.scrollPosition, animated: true)
+        }
         var reloadIndex = pickerCollectionView.visibleIndexPath
         if let index = lastSelectedIndex {
             reloadIndex = prepareCellsToRealod(currentIndex: index, newIndex: indexPath)
@@ -348,6 +388,12 @@ extension MBPickerView: UICollectionViewDelegateFlowLayout, UICollectionViewData
         lastSelectedIndex = indexPath
         collectionView.reloadItems(at:reloadIndex)
     }
+    
+    /// Making sure cell will show right layout
+    public func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+        cell.layoutIfNeeded()
+    }
+    
 }
 
 //MARK: -
@@ -379,8 +425,8 @@ extension MBPickerView: UIScrollViewDelegate {
         if !allowSelectionWhileScrolling {
             lastSelectedIndex = pickerCollectionView.centerIndex()
         }
-        if let index = lastSelectedIndex {
-            pickerCollectionView.scrollToItem(at: index, at: .centeredHorizontally, animated: true)
+        if let index = lastSelectedIndex, let flowLayout = flowLayout {
+            pickerCollectionView.scrollToItem(at: index, at: flowLayout.scrollPosition, animated: true)
             pickerCollectionView.reloadItems(at: pickerCollectionView.visibleIndexPath)
         }
     }
@@ -410,17 +456,30 @@ fileprivate class PickerCollectionView: UICollectionView {
         }
         return indexes
     }
-    
+    // Get center index of PickerView
     func centerIndex() -> IndexPath? {
         guard self.numberOfItems(inSection: 0) > 0, let flowLayout = collectionViewLayout as? PickerFlowLayout else { return nil }
-        
+        switch flowLayout.scrollDirection {
+        case .vertical: return verticalCenterIndex(flowLayout)
+        case .horizontal: return horizontalCenterIndex(flowLayout)
+        }
+    }
+    
+    private func verticalCenterIndex(_ flowLayout: PickerFlowLayout) -> IndexPath {
+        var centerPoint = self.contentOffset.y + (bounds.height/2)
+        centerPoint = centerPoint - flowLayout.sectionInset.top
+        let itemIndex = max(Int(ceil(centerPoint/flowLayout.itemSize.height))-1, 0)
+        let indexPath = IndexPath(item: min(itemIndex, self.numberOfItems(inSection: 0)-1), section: 0)
+        return indexPath
+    }
+    
+    private func horizontalCenterIndex(_ flowLayout: PickerFlowLayout) -> IndexPath {
         var centerPoint = self.contentOffset.x + (bounds.width/2)
         centerPoint = centerPoint - flowLayout.sectionInset.left
         let itemIndex = max(Int(ceil(centerPoint/flowLayout.itemSize.width))-1, 0)
         let indexPath = IndexPath(item: min(itemIndex, self.numberOfItems(inSection: 0)-1), section: 0)
         return indexPath
     }
-    
 }
 
 // MARK: -
@@ -428,9 +487,21 @@ private class PickerFlowLayout: UICollectionViewFlowLayout {
     /// Setup default values for flow layout
     override func prepare() {
         super.prepare()
-        scrollDirection = .horizontal
         minimumLineSpacing = 0
         minimumInteritemSpacing = 0
+    }
+    
+    class func defaultLayout() -> PickerFlowLayout {
+        let layout = PickerFlowLayout()
+        layout.scrollDirection = .horizontal
+        return layout
+    }
+    // Get scroll position for layout as ScrollDirection
+    var scrollPosition: UICollectionViewScrollPosition {
+        switch  self.scrollDirection {
+        case .vertical: return .centeredVertically
+        case .horizontal: return .centeredHorizontally
+        }
     }
 }
 
